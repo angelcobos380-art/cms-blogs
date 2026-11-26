@@ -128,18 +128,15 @@ export function DashboardPage() {
         <ContentStatusChart byStatus={byStatus} />
       </div>
 
-      {/* Cadencia mensual + Ranking Top + Tags & Recientes */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Cadencia mensual + Tags & Recientes */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
         <PostsPerMonthChart data={summary.data?.posts_per_month ?? []} />
-        <div className="lg:col-span-2">
-          <RankingTableCard posts={summary.data?.top_posts ?? []} totalViews={totalViews} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <TopTagsList tags={summary.data?.top_tags ?? []} />
         <RecentPostsTable />
       </div>
+
+      {/* Ranking Top al final a ancho completo */}
+      <RankingTableCard posts={summary.data?.top_posts ?? []} totalViews={totalViews} />
     </div>
   );
 }

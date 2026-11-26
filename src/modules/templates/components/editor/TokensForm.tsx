@@ -1,22 +1,25 @@
 import type { TemplateTokens } from '../../types/template.types';
 
+export type TokenSection = 'colors' | 'typography' | 'layout' | 'blocks';
+
 interface TokensFormProps {
   tokens: TemplateTokens;
+  activeSection: TokenSection;
   onChange: (next: TemplateTokens) => void;
 }
 
 const COLOR_FIELDS: Array<{ key: keyof TemplateTokens['colors']; label: string }> = [
-  { key: 'background', label: 'Fondo' },
-  { key: 'surface', label: 'Superficie' },
-  { key: 'text', label: 'Texto' },
+  { key: 'background', label: 'Fondo principal' },
+  { key: 'surface', label: 'Superficie / tarjetas' },
+  { key: 'text', label: 'Texto principal' },
   { key: 'textMuted', label: 'Texto secundario' },
-  { key: 'accent', label: 'Acento' },
+  { key: 'accent', label: 'Color de acento' },
   { key: 'link', label: 'Enlaces' },
   { key: 'border', label: 'Bordes' },
   { key: 'codeBg', label: 'Fondo código' },
 ];
 
-export function TokensForm({ tokens, onChange }: TokensFormProps) {
+export function TokensForm({ tokens, activeSection, onChange }: TokensFormProps) {
   const updateColor = (key: keyof TemplateTokens['colors'], value: string) => {
     onChange({
       ...tokens,
@@ -24,33 +27,80 @@ export function TokensForm({ tokens, onChange }: TokensFormProps) {
     });
   };
 
-  return (
-    <div className="space-y-5 text-xs">
-      {/* Colores */}
-      <div className="space-y-2.5">
-        <p className="font-semibold text-[var(--fg-muted)] uppercase tracking-wider">Colores</p>
-        <div className="grid grid-cols-2 gap-2">
+  if (activeSection === 'colors') {
+    return (
+      <div className="space-y-3 text-xs">
+        <p className="font-semibold text-[var(--fg-muted)] uppercase tracking-wider">
+          Paleta de colores
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {COLOR_FIELDS.map(({ key, label }) => (
             <label
               key={key}
-              className="flex items-center justify-between gap-2 rounded-lg border bg-[var(--bg)] px-2.5 py-2"
+              className="flex items-center justify-between gap-2 rounded-xl border bg-[var(--bg)] px-3 py-2"
             >
-              <span>{label}</span>
+              <div>
+                <span className="block font-medium">{label}</span>
+                <span className="font-mono text-[10px] text-[var(--fg-muted)]">
+                  {tokens.colors[key]}
+                </span>
+              </div>
               <input
                 type="color"
                 value={tokens.colors[key]}
                 onChange={(e) => updateColor(key, e.target.value)}
-                className="h-6 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
+                className="h-7 w-9 cursor-pointer rounded border-0 bg-transparent p-0"
               />
             </label>
           ))}
         </div>
       </div>
+    );
+  }
 
-      {/* Tipografía */}
-      <div className="space-y-3 pt-3 border-t">
-        <p className="font-semibold text-[var(--fg-muted)] uppercase tracking-wider">Tipografía</p>
+  if (activeSection === 'typography') {
+    return (
+      <div className="space-y-4 text-xs">
+        <p className="font-semibold text-[var(--fg-muted)] uppercase tracking-wider">
+          Tipografía y lectura
+        </p>
+
         <label className="block space-y-1">
+          <span className="font-medium text-[var(--fg-muted)]">Fuente de títulos</span>
+          <select
+            value={tokens.typography.headingFont}
+            onChange={(e) =>
+              onChange({
+                ...tokens,
+                typography: { ...tokens.typography, headingFont: e.target.value },
+              })
+            }
+            className="h-9 w-full rounded-lg border bg-[var(--bg)] px-2.5"
+          >
+            <option value="Inter, ui-sans-serif, system-ui, sans-serif">Inter (Sans moderna)</option>
+            <option value="Georgia, 'Times New Roman', serif">Georgia (Editorial Serif)</option>
+            <option value="ui-monospace, SFMono-Regular, Menlo, monospace">Monospace (Técnica)</option>
+          </select>
+        </label>
+
+        <label className="block space-y-1">
+          <span className="font-medium text-[var(--fg-muted)]">Fuente de cuerpo</span>
+          <select
+            value={tokens.typography.bodyFont}
+            onChange={(e) =>
+              onChange({
+                ...tokens,
+                typography: { ...tokens.typography, bodyFont: e.target.value },
+              })
+            }
+            className="h-9 w-full rounded-lg border bg-[var(--bg)] px-2.5"
+          >
+            <option value="Inter, ui-sans-serif, system-ui, sans-serif">Inter (Sans)</option>
+            <option value="Georgia, serif">Georgia (Serif)</option>
+          </select>
+        </label>
+
+        <label className="block space-y-1.5">
           <div className="flex justify-between">
             <span>Tamaño base</span>
             <span className="font-mono">{tokens.typography.baseSize}px</span>
@@ -70,7 +120,7 @@ export function TokensForm({ tokens, onChange }: TokensFormProps) {
           />
         </label>
 
-        <label className="block space-y-1">
+        <label className="block space-y-1.5">
           <div className="flex justify-between">
             <span>Interlineado</span>
             <span className="font-mono">{tokens.typography.lineHeight}</span>
@@ -91,13 +141,19 @@ export function TokensForm({ tokens, onChange }: TokensFormProps) {
           />
         </label>
       </div>
+    );
+  }
 
-      {/* Layout */}
-      <div className="space-y-3 pt-3 border-t">
-        <p className="font-semibold text-[var(--fg-muted)] uppercase tracking-wider">Layout</p>
-        <label className="block space-y-1">
+  if (activeSection === 'layout') {
+    return (
+      <div className="space-y-4 text-xs">
+        <p className="font-semibold text-[var(--fg-muted)] uppercase tracking-wider">
+          Layout y cabecera
+        </p>
+
+        <label className="block space-y-1.5">
           <div className="flex justify-between">
-            <span>Ancho máximo</span>
+            <span>Ancho máximo del artículo</span>
             <span className="font-mono">{tokens.layout.maxWidth}px</span>
           </div>
           <input
@@ -116,9 +172,9 @@ export function TokensForm({ tokens, onChange }: TokensFormProps) {
           />
         </label>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2.5">
           <label className="space-y-1">
-            <span className="text-[var(--fg-muted)] block">Cabecera</span>
+            <span className="text-[var(--fg-muted)] block">Estilo de cabecera</span>
             <select
               value={tokens.layout.headerStyle}
               onChange={(e) =>
@@ -130,7 +186,7 @@ export function TokensForm({ tokens, onChange }: TokensFormProps) {
                   },
                 })
               }
-              className="h-8 w-full rounded-lg border bg-[var(--bg)] px-2"
+              className="h-9 w-full rounded-lg border bg-[var(--bg)] px-2.5"
             >
               <option value="minimal">minimal</option>
               <option value="editorial-centered">editorial-centered</option>
@@ -140,7 +196,7 @@ export function TokensForm({ tokens, onChange }: TokensFormProps) {
           </label>
 
           <label className="space-y-1">
-            <span className="text-[var(--fg-muted)] block">Radio imágenes</span>
+            <span className="text-[var(--fg-muted)] block">Radio imágenes (px)</span>
             <input
               type="number"
               min={0}
@@ -152,55 +208,118 @@ export function TokensForm({ tokens, onChange }: TokensFormProps) {
                   layout: { ...tokens.layout, imageRadius: Number(e.target.value) },
                 })
               }
-              className="h-8 w-full rounded-lg border bg-[var(--bg)] px-2"
+              className="h-9 w-full rounded-lg border bg-[var(--bg)] px-2.5"
             />
           </label>
         </div>
       </div>
+    );
+  }
 
-      {/* Bloques */}
-      <div className="space-y-3 pt-3 border-t">
-        <p className="font-semibold text-[var(--fg-muted)] uppercase tracking-wider">Bloques</p>
-        <div className="grid grid-cols-2 gap-2">
-          <label className="flex items-center justify-between rounded-lg border bg-[var(--bg)] px-2.5 py-2">
-            <span>Borde cita</span>
-            <input
-              type="color"
-              value={tokens.blocks.quote.borderColor}
-              onChange={(e) =>
-                onChange({
-                  ...tokens,
-                  blocks: {
-                    ...tokens.blocks,
-                    quote: { ...tokens.blocks.quote, borderColor: e.target.value },
-                  },
-                })
-              }
-              className="h-6 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
-            />
-          </label>
+  return (
+    <div className="space-y-4 text-xs">
+      <p className="font-semibold text-[var(--fg-muted)] uppercase tracking-wider">
+        Bloques del lienzo (Callout, Cita y Código)
+      </p>
 
-          <label className="flex items-center justify-between rounded-lg border bg-[var(--bg)] px-2.5 py-2">
-            <span>Radio código</span>
-            <input
-              type="number"
-              min={0}
-              max={32}
-              value={tokens.blocks.code.radius}
-              onChange={(e) =>
-                onChange({
-                  ...tokens,
-                  blocks: {
-                    ...tokens.blocks,
-                    code: { ...tokens.blocks.code, radius: Number(e.target.value) },
+      <div className="grid grid-cols-2 gap-2.5">
+        <label className="flex items-center justify-between rounded-xl border bg-[var(--bg)] px-3 py-2">
+          <span>Fondo Callout Tip</span>
+          <input
+            type="color"
+            value={tokens.blocks.callout.tip.bg}
+            onChange={(e) =>
+              onChange({
+                ...tokens,
+                blocks: {
+                  ...tokens.blocks,
+                  callout: {
+                    ...tokens.blocks.callout,
+                    tip: { ...tokens.blocks.callout.tip, bg: e.target.value },
                   },
-                })
-              }
-              className="h-6 w-14 rounded border bg-transparent px-1.5 text-right"
-            />
-          </label>
-        </div>
+                },
+              })
+            }
+            className="h-6 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
+          />
+        </label>
+
+        <label className="flex items-center justify-between rounded-xl border bg-[var(--bg)] px-3 py-2">
+          <span>Borde Callout Tip</span>
+          <input
+            type="color"
+            value={tokens.blocks.callout.tip.border}
+            onChange={(e) =>
+              onChange({
+                ...tokens,
+                blocks: {
+                  ...tokens.blocks,
+                  callout: {
+                    ...tokens.blocks.callout,
+                    tip: { ...tokens.blocks.callout.tip, border: e.target.value },
+                  },
+                },
+              })
+            }
+            className="h-6 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
+          />
+        </label>
+
+        <label className="flex items-center justify-between rounded-xl border bg-[var(--bg)] px-3 py-2">
+          <span>Borde Cita</span>
+          <input
+            type="color"
+            value={tokens.blocks.quote.borderColor}
+            onChange={(e) =>
+              onChange({
+                ...tokens,
+                blocks: {
+                  ...tokens.blocks,
+                  quote: { ...tokens.blocks.quote, borderColor: e.target.value },
+                },
+              })
+            }
+            className="h-6 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
+          />
+        </label>
+
+        <label className="flex items-center justify-between rounded-xl border bg-[var(--bg)] px-3 py-2">
+          <span>Radio Código (px)</span>
+          <input
+            type="number"
+            min={0}
+            max={32}
+            value={tokens.blocks.code.radius}
+            onChange={(e) =>
+              onChange({
+                ...tokens,
+                blocks: {
+                  ...tokens.blocks,
+                  code: { ...tokens.blocks.code, radius: Number(e.target.value) },
+                },
+              })
+            }
+            className="h-7 w-14 rounded border bg-transparent px-1.5 text-right"
+          />
+        </label>
       </div>
+
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={tokens.blocks.code.showLanguageBadge}
+          onChange={(e) =>
+            onChange({
+              ...tokens,
+              blocks: {
+                ...tokens.blocks,
+                code: { ...tokens.blocks.code, showLanguageBadge: e.target.checked },
+              },
+            })
+          }
+        />
+        <span>Mostrar cabecera y badge de lenguaje en bloques de código</span>
+      </label>
     </div>
   );
 }

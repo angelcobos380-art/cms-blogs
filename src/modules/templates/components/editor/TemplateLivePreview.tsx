@@ -1,21 +1,60 @@
+import { cn } from '@shared/lib/cn';
 import { tokensToCssVars } from '../../lib/tokensToCssVars';
 import type { TemplateTokens } from '../../types/template.types';
+import type { TokenSection } from './TokensForm';
 
 interface TemplateLivePreviewProps {
   name: string;
   tokens: TemplateTokens;
+  activeSection: TokenSection;
+  onSelectSection: (section: TokenSection) => void;
 }
 
-export function TemplateLivePreview({ name, tokens }: TemplateLivePreviewProps) {
+export function TemplateLivePreview({
+  name,
+  tokens,
+  activeSection,
+  onSelectSection,
+}: TemplateLivePreviewProps) {
   const isCentered = tokens.layout.headerStyle === 'editorial-centered';
+
+  const interactiveWrap = (section: TokenSection, label: string) =>
+    cn(
+      'relative rounded-xl transition cursor-pointer group p-2 -m-2',
+      activeSection === section
+        ? 'ring-2 ring-[var(--accent)] ring-offset-2'
+        : 'hover:ring-1 hover:ring-[var(--accent)]/40',
+      label ? '' : '',
+    );
 
   return (
     <div className="rounded-2xl border overflow-hidden">
-      <div className="px-4 py-2.5 border-b bg-[var(--card)] flex items-center justify-between text-xs">
-        <span className="font-semibold">Vista previa en vivo</span>
-        <span className="text-[var(--fg-muted)]">
-          Cuerpo de artículo de ejemplo · {tokens.layout.maxWidth}px
-        </span>
+      <div className="px-4 py-2.5 border-b bg-[var(--card)] flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-1.5">
+          {(
+            [
+              { id: 'colors', label: '1. Colores' },
+              { id: 'typography', label: '2. Tipografía' },
+              { id: 'layout', label: '3. Layout' },
+              { id: 'blocks', label: '4. Bloques' },
+            ] as Array<{ id: TokenSection; label: string }>
+          ).map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => onSelectSection(s.id)}
+              className={cn(
+                'rounded-full px-2.5 py-0.5 text-[11px] font-medium transition cursor-pointer',
+                activeSection === s.id
+                  ? 'bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent)]/40'
+                  : 'text-[var(--fg-muted)] hover:bg-[var(--bg-subtle)]',
+              )}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <span className="text-[var(--fg-muted)]">Haz clic en cualquier bloque para editarlo</span>
       </div>
 
       <div
@@ -31,7 +70,11 @@ export function TemplateLivePreview({ name, tokens }: TemplateLivePreviewProps) 
       >
         <div className="mx-auto space-y-5" style={{ maxWidth: 'var(--cms-max-width)' }}>
           <header
-            className="pb-5 border-b space-y-2.5"
+            onClick={() => onSelectSection('typography')}
+            className={cn(
+              interactiveWrap('typography', 'Tipografía'),
+              'pb-5 border-b space-y-2.5',
+            )}
             style={{
               borderColor: 'var(--cms-border)',
               textAlign: isCentered ? 'center' : 'left',
@@ -54,7 +97,11 @@ export function TemplateLivePreview({ name, tokens }: TemplateLivePreviewProps) 
             </p>
           </header>
 
-          <p style={{ color: 'var(--cms-text-muted)' }}>
+          <p
+            onClick={() => onSelectSection('colors')}
+            className={interactiveWrap('colors', 'Colores')}
+            style={{ color: 'var(--cms-text-muted)' }}
+          >
             Los design tokens controlan tipografía, colores,{' '}
             <a href="#preview-link" style={{ color: 'var(--cms-link)', textDecoration: 'underline' }}>
               enlaces
@@ -62,66 +109,70 @@ export function TemplateLivePreview({ name, tokens }: TemplateLivePreviewProps) 
             y espaciado sin mezclar CSS libre. Así se verá cualquier post publicado.
           </p>
 
-          <h2
-            className="text-xl font-bold pt-2"
-            style={{ fontFamily: 'var(--cms-heading-font)' }}
-          >
-            1. Separación de contenido y diseño
-          </h2>
-
-          <ul className="list-disc pl-6 space-y-1 text-sm" style={{ color: 'var(--cms-text-muted)' }}>
-            <li>Fuente de verdad estructurada en JSON.</li>
-            <li>Renderizado consistente en editor y sitio público.</li>
-          </ul>
-
-          {/* Bloque de aviso / Callout */}
           <div
-            className="rounded-xl border-l-4 px-4 py-3 text-sm"
-            style={{
-              backgroundColor: 'var(--cms-callout-tip-bg)',
-              borderLeftColor: 'var(--cms-callout-tip-border)',
-            }}
+            onClick={() => onSelectSection('blocks')}
+            className={interactiveWrap('blocks', 'Bloques')}
           >
-            <strong className="block text-xs uppercase mb-1">[!TIP] Bloque destacado</strong>
-            <span>Los callouts y avisos adaptan su paleta automáticamente a cada plantilla.</span>
-          </div>
-
-          {/* Cita */}
-          <blockquote
-            className="border-l-4 pl-4 py-1"
-            style={{
-              borderLeftColor: 'var(--cms-quote-border)',
-              fontStyle: 'var(--cms-quote-style)',
-              color: 'var(--cms-text-muted)',
-            }}
-          >
-            La presentación cambia en un clic; el contenido JSON permanece intacto.
-          </blockquote>
-
-          {/* Bloque de código con badge de lenguaje */}
-          <div
-            className="overflow-hidden border"
-            style={{
-              backgroundColor: 'var(--cms-code-bg)',
-              borderColor: 'var(--cms-border)',
-              borderRadius: 'var(--cms-code-radius)',
-            }}
-          >
-            {tokens.blocks.code.showLanguageBadge && (
-              <div className="px-3.5 py-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 border-b border-white/10">
-                typescript
+            <div className="space-y-4">
+              {/* Callout */}
+              <div
+                className="rounded-xl border-l-4 px-4 py-3 text-sm"
+                style={{
+                  backgroundColor: 'var(--cms-callout-tip-bg)',
+                  borderLeftColor: 'var(--cms-callout-tip-border)',
+                }}
+              >
+                <strong className="block text-xs uppercase mb-1">[!TIP] Bloque destacado</strong>
+                <span>Los callouts y avisos adaptan su paleta automáticamente a cada plantilla.</span>
               </div>
-            )}
-            <pre
-              className="p-4 text-xs overflow-x-auto text-slate-100 m-0"
-              style={{ fontFamily: 'var(--cms-code-font)' }}
-            >
-              <code>{`export const theme = {\n  maxWidth: ${tokens.layout.maxWidth},\n  accent: '${tokens.colors.accent}',\n};`}</code>
-            </pre>
+
+              {/* Cita */}
+              <blockquote
+                className="border-l-4 pl-4 py-1"
+                style={{
+                  borderLeftColor: 'var(--cms-quote-border)',
+                  fontStyle: 'var(--cms-quote-style)',
+                  color: 'var(--cms-text-muted)',
+                }}
+              >
+                La presentación cambia en un clic; el contenido JSON permanece intacto.
+              </blockquote>
+
+              {/* Bloque de código estilo macOS */}
+              <div
+                className="overflow-hidden border"
+                style={{
+                  backgroundColor: 'var(--cms-code-bg)',
+                  borderColor: 'var(--cms-border)',
+                  borderRadius: 'var(--cms-code-radius)',
+                }}
+              >
+                {tokens.blocks.code.showLanguageBadge && (
+                  <div className="px-3.5 py-2 flex items-center justify-between border-b border-white/10">
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
+                      <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                    </div>
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
+                      typescript
+                    </span>
+                  </div>
+                )}
+                <pre
+                  className="p-4 text-xs overflow-x-auto text-slate-100 m-0"
+                  style={{ fontFamily: 'var(--cms-code-font)' }}
+                >
+                  <code>{`export const theme = {\n  maxWidth: ${tokens.layout.maxWidth},\n  accent: '${tokens.colors.accent}',\n};`}</code>
+                </pre>
+              </div>
+            </div>
           </div>
 
-          {/* Imagen de ejemplo con radio configurado */}
-          <figure className="space-y-1.5">
+          <figure
+            onClick={() => onSelectSection('layout')}
+            className={cn(interactiveWrap('layout', 'Layout'), 'space-y-1.5')}
+          >
             <div
               className="h-28 w-full border flex items-center justify-center text-xs"
               style={{
@@ -131,7 +182,7 @@ export function TemplateLivePreview({ name, tokens }: TemplateLivePreviewProps) 
                 color: 'var(--cms-text-muted)',
               }}
             >
-              Imagen de ejemplo (radio: {tokens.layout.imageRadius}px)
+              Imagen de ejemplo (ancho: {tokens.layout.maxWidth}px · radio: {tokens.layout.imageRadius}px)
             </div>
             <figcaption className="text-center text-xs" style={{ color: 'var(--cms-text-muted)' }}>
               Pie de foto centrado de ejemplo

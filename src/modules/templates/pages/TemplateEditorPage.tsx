@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Box, Layout, Palette, Save, Type } from 'lucide-react';
 import { ROUTES } from '@app/router/routes';
 import { normalizeApiError } from '@core/api/errors';
 import { ErrorState } from '@shared/components/ErrorState';
@@ -8,12 +8,24 @@ import { PageHeader } from '@shared/components/PageHeader';
 import { toast } from '@shared/components/Toaster';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
+import { cn } from '@shared/lib/cn';
 import { TemplateLivePreview } from '../components/editor/TemplateLivePreview';
-import { TokensForm } from '../components/editor/TokensForm';
+import { TokensForm, type TokenSection } from '../components/editor/TokensForm';
 import { useTemplate } from '../hooks/useTemplate';
 import { useTemplateMutations } from '../hooks/useTemplateMutations';
-import { DEFAULT_TEMPLATE_TOKENS, TEMPLATE_PRESETS, templateFormSchema } from '../schemas/template.schema';
+import {
+  DEFAULT_TEMPLATE_TOKENS,
+  TEMPLATE_PRESETS,
+  templateFormSchema,
+} from '../schemas/template.schema';
 import type { TemplateTokens } from '../types/template.types';
+
+const SECTIONS: Array<{ id: TokenSection; label: string; hint: string; icon: typeof Palette }> = [
+  { id: 'colors', label: 'Colores', hint: 'Fondo, texto y acentos', icon: Palette },
+  { id: 'typography', label: 'Tipografía', hint: 'Fuentes, tamaño e interlineado', icon: Type },
+  { id: 'layout', label: 'Layout', hint: 'Ancho, cabecera e imágenes', icon: Layout },
+  { id: 'blocks', label: 'Bloques', hint: 'Callouts, citas y código', icon: Box },
+];
 
 export function TemplateEditorPage() {
   const { templateId } = useParams();
@@ -26,6 +38,7 @@ export function TemplateEditorPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [tokens, setTokens] = useState<TemplateTokens>(DEFAULT_TEMPLATE_TOKENS);
+  const [activeSection, setActiveSection] = useState<TokenSection>('colors');
   const [formError, setFormError] = useState<string | null>(null);
   const [hydratedId, setHydratedId] = useState<string | null>(null);
 
@@ -85,7 +98,7 @@ export function TemplateEditorPage() {
     <div className="max-w-7xl mx-auto space-y-5">
       <PageHeader
         title={isNew ? 'Nueva plantilla' : `Editar: ${existing?.name ?? ''}`}
-        description="Define los tokens visuales JSON y previsualiza el resultado al instante."
+        description="Edita por capas o haz clic directo sobre cualquier bloque de la vista previa."
         actions={
           <Link to={ROUTES.TEMPLATES}>
             <Button variant="outline" size="sm">
@@ -97,76 +110,113 @@ export function TemplateEditorPage() {
       />
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        <div className="lg:col-span-5 rounded-2xl border bg-[var(--card)] p-5 space-y-4">
-          {isNew && (
-            <div className="space-y-1.5 pb-3 border-b">
-              <span className="text-xs font-medium text-[var(--fg-muted)] block">
-                Comenzar desde un estilo base (opcional)
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {TEMPLATE_PRESETS.map((preset) => (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    onClick={() => {
-                      if (!name.trim()) setName(preset.label);
-                      if (!description.trim()) setDescription(preset.description);
-                      setTokens(preset.tokens);
-                    }}
-                    className="inline-flex items-center gap-1.5 rounded-lg border bg-[var(--bg-subtle)] px-2.5 py-1.5 text-xs hover:border-[var(--accent)] transition cursor-pointer"
-                  >
-                    <span
-                      className="h-2.5 w-2.5 rounded-full border"
-                      style={{ backgroundColor: preset.tokens.colors.accent }}
-                    />
-                    <span>{preset.label}</span>
-                  </button>
-                ))}
+        {/* Columna izquierda: selector de sección + metadatos + controles */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="rounded-2xl border bg-[var(--card)] p-4 space-y-3">
+            {isNew && (
+              <div className="space-y-1.5 pb-3 border-b">
+                <span className="text-xs font-medium text-[var(--fg-muted)] block">
+                  Comenzar desde un estilo base (opcional)
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {TEMPLATE_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => {
+                        if (!name.trim()) setName(preset.label);
+                        if (!description.trim()) setDescription(preset.description);
+                        setTokens(preset.tokens);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-lg border bg-[var(--bg-subtle)] px-2.5 py-1.5 text-xs hover:border-[var(--accent)] transition cursor-pointer"
+                    >
+                      <span
+                        className="h-2.5 w-2.5 rounded-full border"
+                        style={{ backgroundColor: preset.tokens.colors.accent }}
+                      />
+                      <span>{preset.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label htmlFor="tpl-name" className="text-xs font-medium text-[var(--fg-muted)]">
+                  Nombre
+                </label>
+                <Input
+                  id="tpl-name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ej. Editorial Claro"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label htmlFor="tpl-desc" className="text-xs font-medium text-[var(--fg-muted)]">
+                  Descripción
+                </label>
+                <Input
+                  id="tpl-desc"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Breve resumen…"
+                />
               </div>
             </div>
-          )}
-
-          <div className="space-y-1.5">
-            <label htmlFor="tpl-name" className="text-xs font-medium text-[var(--fg-muted)]">
-              Nombre de la plantilla
-            </label>
-            <Input
-              id="tpl-name"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ej. Editorial Claro"
-            />
           </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="tpl-desc" className="text-xs font-medium text-[var(--fg-muted)]">
-              Descripción
-            </label>
-            <Input
-              id="tpl-desc"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Tipografía serif, mucho aire…"
-            />
+          <div className="rounded-2xl border bg-[var(--card)] p-4 space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              {SECTIONS.map(({ id, label, hint, icon: Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setActiveSection(id)}
+                  className={cn(
+                    'flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition cursor-pointer',
+                    activeSection === id
+                      ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]'
+                      : 'bg-[var(--bg)] hover:bg-[var(--bg-subtle)]',
+                  )}
+                >
+                  <Icon className="h-4 w-4 shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold">{label}</p>
+                    <p className="text-[10px] opacity-75 truncate">{hint}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="pt-2 border-t">
+              <TokensForm tokens={tokens} activeSection={activeSection} onChange={setTokens} />
+            </div>
+
+            {formError && (
+              <p className="text-xs text-[var(--danger)]" role="alert">
+                {formError}
+              </p>
+            )}
+
+            <Button type="submit" className="w-full" disabled={isSaving}>
+              <Save className="h-4 w-4" />
+              <span>{isSaving ? 'Guardando…' : isNew ? 'Crear plantilla' : 'Guardar cambios'}</span>
+            </Button>
           </div>
-
-          <TokensForm tokens={tokens} onChange={setTokens} />
-
-          {formError && (
-            <p className="text-xs text-[var(--danger)]" role="alert">
-              {formError}
-            </p>
-          )}
-
-          <Button type="submit" className="w-full" disabled={isSaving}>
-            <Save className="h-4 w-4" />
-            <span>{isSaving ? 'Guardando…' : isNew ? 'Crear plantilla' : 'Guardar cambios'}</span>
-          </Button>
         </div>
 
+        {/* Columna derecha: vista previa interactiva */}
         <div className="lg:col-span-7">
-          <TemplateLivePreview name={name} tokens={tokens} />
+          <TemplateLivePreview
+            name={name}
+            tokens={tokens}
+            activeSection={activeSection}
+            onSelectSection={setActiveSection}
+          />
         </div>
       </form>
     </div>
