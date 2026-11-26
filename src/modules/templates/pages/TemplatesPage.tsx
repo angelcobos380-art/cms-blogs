@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search } from 'lucide-react';
+import { Layers, Plus, Search } from 'lucide-react';
 import { ROUTES } from '@app/router/routes';
 import { normalizeApiError } from '@core/api/errors';
 import { ConfirmDialog } from '@shared/components/ConfirmDialog';
 import { EmptyState } from '@shared/components/EmptyState';
 import { ErrorState } from '@shared/components/ErrorState';
-import { PageHeader } from '@shared/components/PageHeader';
 import { toast } from '@shared/components/Toaster';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
@@ -36,18 +35,26 @@ export function TemplatesPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-5">
-      <PageHeader
-        title="Plantillas"
-        description="Crea y personaliza design tokens JSON reutilizables para el editor y tus sitios públicos."
-        actions={
-          <Link to={ROUTES.TEMPLATE_NEW}>
-            <Button size="sm">
-              <Plus className="h-4 w-4" />
-              <span>Nueva plantilla</span>
-            </Button>
-          </Link>
-        }
-      />
+      <section className="rounded-2xl border bg-[var(--card)] p-5 md:p-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="max-w-2xl space-y-1.5">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--accent)]">
+            <Layers className="h-3.5 w-3.5" />
+            <span>Estudio de Plantillas</span>
+          </span>
+          <h1 className="text-xl font-bold tracking-tight">Administración de Plantillas</h1>
+          <p className="text-xs md:text-sm text-[var(--fg-muted)]">
+            Define paletas, tipografías y estilos de bloques (código, citas, callouts e imágenes)
+            como design tokens JSON reutilizables en el editor y tu sitio público.
+          </p>
+        </div>
+
+        <Link to={ROUTES.TEMPLATE_NEW}>
+          <Button size="sm">
+            <Plus className="h-4 w-4" />
+            <span>Nueva plantilla</span>
+          </Button>
+        </Link>
+      </section>
 
       <div className="rounded-xl border bg-[var(--card)] p-3 flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[220px]">
