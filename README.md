@@ -1,26 +1,41 @@
-# CMS Admin
+# CMS Admin (`v1.0.0`)
 
 Panel de administración headless en **React 19 + TypeScript + Vite**, desacoplado del backend FastAPI. Pensado como un CMS reutilizable para cualquier sitio o blog consumidor (Astro, Next.js, etc.).
 
-## Módulos
+## Módulos principales
 
-- **Dashboard (`/dashboard`):** métricas de estado, visitas en el tiempo (Recharts), actividad mensual, top artículos y top tags.
-- **Blogs (`/blogs` y `/blogs/:postId`):** listado paginado con filtros, flujo de 3 estados (`BORRADOR` ↔ `PUBLICADO` ↔ `ARCHIVADO`), editor WYSIWYG (Tiptap) sobre `TemplateScope`, autoguardado en borradores y guardado explícito en publicados.
-- **Plantillas (`/templates`):** galería, creación desde cero y editor de design tokens JSON con vista previa en vivo.
+- **Dashboard (`/dashboard`):**
+  - KPIs consolidados (*Vistas del periodo con tendencia*, *Tasa de publicación*, *Borradores pendientes* y *Promedio por artículo*).
+  - Gráfica de visitas en el tiempo (Recharts) filtrable por rango (`7d`, `30d`, `12m`), granularidad (`Día`, `Semana`) y **por artículo específico**.
+  - Salud del contenido (donut por estado), cadencia editorial (*Creados vs. Publicados*), tags principales, recientes y tabla de ranking.
+- **Blogs (`/blogs` y `/blogs/:postId`):**
+  - Listado paginado con filtros por estado (`BORRADOR`, `PUBLICADO`, `ARCHIVADO`), tag y búsqueda.
+  - Flujo de 3 estados (`BORRADOR` ↔ `PUBLICADO` ↔ `ARCHIVADO` reversible) con checklist previa a publicar.
+  - Editor WYSIWYG (Tiptap) sobre `TemplateScope` con énfasis en sección activa (`ActiveBlock`), bloques avanzados (Callouts `info/tip/warning/danger`, código, citas, imágenes con pie de foto) y `ReaderPreview` (escritorio y móvil).
+  - Autoguardado debounced en `BORRADOR` y respaldo local + guardado explícito (**Actualizar publicación**) en `PUBLICADO`.
+  - Inspector lateral con 4 pestañas: **Estilo** (color, alineación, callout, plantilla), **Detalles** (tags, extracto, portada), **SEO** (slug + vista previa en Google) e **Índice** (métricas de lectura y salto a encabezados).
+- **Plantillas (`/templates`, `/templates/new` y `/templates/:templateId`):**
+  - Galería con mini vista previa de bloques, búsqueda, filtro por estado y acciones (duplicar, archivar, restaurar, predeterminada y eliminar).
+  - Editor interactivo por secciones (**Colores**, **Tipografía**, **Layout**, **Bloques**) con vista previa clicable en vivo y 3 estilos base predefinidos.
 
 ## Desarrollo local
 
+### 1. Modo conectado al backend FastAPI
 ```bash
 cp .env.example .env
+# Verifica VITE_API_URL=http://localhost:8000/api/v1 y VITE_ENABLE_MOCKS=false
 npm install
 npm run dev
 ```
 
-Para probar la interfaz sin levantar el backend FastAPI, activa los mocks MSW en `.env`:
-
+### 2. Modo aislado (con mocks MSW)
 ```bash
-VITE_ENABLE_MOCKS=true
+cp .env.example .env
+# Cambia VITE_ENABLE_MOCKS=true en .env
+npx msw init public/ --save
+npm run dev
 ```
+Credenciales mock: `admin@example.com` / `Admin123!`.
 
 ## Variables de entorno
 
@@ -41,4 +56,8 @@ VITE_ENABLE_MOCKS=true
 
 ## Despliegue (Vercel / Netlify)
 
-El proyecto incluye `vercel.json` y `public/_redirects` para enrutamiento SPA. Configura `VITE_API_URL` apuntando a tu instancia FastAPI y agrega el dominio de este panel en `CORS_ORIGINS` del backend.
+1. Importa este repositorio en **Vercel** o **Netlify** (incluye `vercel.json` y `public/_redirects` para enrutamiento SPA).
+2. Configura las variables de entorno de producción:
+   - `VITE_API_URL=https://<tu-backend>.onrender.com/api/v1`
+   - `VITE_ENABLE_MOCKS=false`
+3. En el backend FastAPI, agrega el dominio desplegado de este panel en `CORS_ORIGINS` (ej. `https://cms-blogs.vercel.app,https://tu-portafolio.vercel.app`).
