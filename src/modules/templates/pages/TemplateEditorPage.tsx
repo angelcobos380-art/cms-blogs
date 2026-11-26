@@ -110,7 +110,17 @@ export function TemplateEditorPage() {
       />
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* Columna izquierda: selector de sección + metadatos + controles */}
+        {/* Columna izquierda: vista previa interactiva */}
+        <div className="lg:col-span-7">
+          <TemplateLivePreview
+            name={name}
+            tokens={tokens}
+            activeSection={activeSection}
+            onSelectSection={setActiveSection}
+          />
+        </div>
+
+        {/* Columna derecha: selector de sección + metadatos + controles */}
         <div className="lg:col-span-5 space-y-4">
           <div className="rounded-2xl border bg-[var(--card)] p-4 space-y-3">
             {isNew && (
@@ -207,16 +217,6 @@ export function TemplateEditorPage() {
               <span>{isSaving ? 'Guardando…' : isNew ? 'Crear plantilla' : 'Guardar cambios'}</span>
             </Button>
           </div>
-        </div>
-
-        {/* Columna derecha: vista previa interactiva */}
-        <div className="lg:col-span-7">
-          <TemplateLivePreview
-            name={name}
-            tokens={tokens}
-            activeSection={activeSection}
-            onSelectSection={setActiveSection}
-          />
         </div>
       </form>
     </div>
