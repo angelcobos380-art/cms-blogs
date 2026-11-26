@@ -24,12 +24,23 @@ export function ViewsOverTimeChart({
   onRangeChange,
   onGranularityChange,
 }: ViewsOverTimeChartProps) {
+  const totalViews = series.reduce((acc, p) => acc + p.views, 0);
+  const avgViews = series.length > 0 ? Math.round((totalViews / series.length) * 10) / 10 : 0;
+  const peakPoint = series.reduce<{ date: string; views: number } | null>(
+    (best, cur) => (!best || cur.views > best.views ? cur : best),
+    null,
+  );
+
   return (
     <div className="rounded-2xl border bg-[var(--card)] p-5 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold">Visitas en el tiempo</h2>
-          <p className="text-xs text-[var(--fg-muted)]">Serie continua desde métricas diarias</p>
+          <p className="text-xs text-[var(--fg-muted)]">
+            {totalViews} vistas en el periodo · Promedio {avgViews}/
+            {granularity === 'day' ? 'día' : 'semana'}
+            {peakPoint && peakPoint.views > 0 ? ` · Pico: ${peakPoint.views} (${peakPoint.date})` : ''}
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -82,8 +93,8 @@ export function ViewsOverTimeChart({
           <AreaChart data={series} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="viewsFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
+                <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.32} />
+                <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -111,7 +122,7 @@ export function ViewsOverTimeChart({
               type="monotone"
               dataKey="views"
               name="Visitas"
-              stroke="#3b82f6"
+              stroke="#4f46e5"
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#viewsFill)"

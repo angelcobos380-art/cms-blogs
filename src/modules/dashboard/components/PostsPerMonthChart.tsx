@@ -1,45 +1,15 @@
-import { useState } from 'react';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 interface PostsPerMonthChartProps {
   data: Array<{ month: string; created: number; published: number }>;
 }
 
 export function PostsPerMonthChart({ data }: PostsPerMonthChartProps) {
-  const [metric, setMetric] = useState<'published' | 'created'>('published');
-
   return (
     <div className="rounded-2xl border bg-[var(--card)] p-5 space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <h2 className="text-sm font-semibold">Actividad mensual</h2>
-          <p className="text-xs text-[var(--fg-muted)]">Publicaciones por mes</p>
-        </div>
-
-        <div className="inline-flex rounded-lg border bg-[var(--bg-subtle)] p-0.5 text-xs">
-          <button
-            type="button"
-            onClick={() => setMetric('published')}
-            className={`px-2.5 py-1 rounded-md font-medium cursor-pointer transition ${
-              metric === 'published'
-                ? 'bg-[var(--primary)] text-[var(--primary-fg)]'
-                : 'text-[var(--fg-muted)]'
-            }`}
-          >
-            Publicados
-          </button>
-          <button
-            type="button"
-            onClick={() => setMetric('created')}
-            className={`px-2.5 py-1 rounded-md font-medium cursor-pointer transition ${
-              metric === 'created'
-                ? 'bg-[var(--primary)] text-[var(--primary-fg)]'
-                : 'text-[var(--fg-muted)]'
-            }`}
-          >
-            Creados
-          </button>
-        </div>
+      <div>
+        <h2 className="text-sm font-semibold">Cadencia editorial</h2>
+        <p className="text-xs text-[var(--fg-muted)]">Artículos creados vs. publicados al mes</p>
       </div>
 
       <div className="h-56 w-full">
@@ -66,12 +36,9 @@ export function PostsPerMonthChart({ data }: PostsPerMonthChartProps) {
                 fontSize: '12px',
               }}
             />
-            <Bar
-              dataKey={metric}
-              name={metric === 'published' ? 'Publicados' : 'Creados'}
-              fill="#10b981"
-              radius={[6, 6, 0, 0]}
-            />
+            <Legend wrapperStyle={{ fontSize: '11px' }} />
+            <Bar dataKey="created" name="Creados" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="published" name="Publicados" fill="#4f46e5" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
