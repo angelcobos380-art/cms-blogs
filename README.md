@@ -1,26 +1,57 @@
-# CMS Admin (`v1.0.0`)
+<div align="center">
 
-Panel de administración headless en **React 19 + TypeScript + Vite**, desacoplado del backend FastAPI. Pensado como un CMS reutilizable para cualquier sitio o blog consumidor (Astro, Next.js, etc.).
+# CMS Admin — Headless Blog Studio
 
-## Módulos principales
+Panel de administración headless en **React 19 + TypeScript + Vite**, diseñado para gestionar artículos, plantillas con *design tokens* JSON y métricas de audiencia de forma desacoplada.
 
-- **Dashboard (`/dashboard`):**
-  - KPIs consolidados (*Vistas del periodo con tendencia*, *Tasa de publicación*, *Borradores pendientes* y *Promedio por artículo*).
-  - Gráfica de visitas en el tiempo (Recharts) filtrable por rango (`7d`, `30d`, `12m`), granularidad (`Día`, `Semana`) y **por artículo específico**.
-  - Salud del contenido (donut por estado), cadencia editorial (*Creados vs. Publicados*), tags principales, recientes y tabla de ranking.
-- **Blogs (`/blogs` y `/blogs/:postId`):**
-  - Listado paginado con filtros por estado (`BORRADOR`, `PUBLICADO`, `ARCHIVADO`), tag y búsqueda.
-  - Flujo de 3 estados (`BORRADOR` ↔ `PUBLICADO` ↔ `ARCHIVADO` reversible) con checklist previa a publicar.
-  - Editor WYSIWYG (Tiptap) sobre `TemplateScope` con énfasis en sección activa (`ActiveBlock`), bloques avanzados (Callouts `info/tip/warning/danger`, código, citas, imágenes con pie de foto) y `ReaderPreview` (escritorio y móvil).
-  - Autoguardado debounced en `BORRADOR` y respaldo local + guardado explícito (**Actualizar publicación**) en `PUBLICADO`.
-  - Inspector lateral con 4 pestañas: **Estilo** (color, alineación, callout, plantilla), **Detalles** (tags, extracto, portada), **SEO** (slug + vista previa en Google) e **Índice** (métricas de lectura y salto a encabezados).
-- **Plantillas (`/templates`, `/templates/new` y `/templates/:templateId`):**
-  - Galería con mini vista previa de bloques, búsqueda, filtro por estado y acciones (duplicar, archivar, restaurar, predeterminada y eliminar).
-  - Editor interactivo por secciones (**Colores**, **Tipografía**, **Layout**, **Bloques**) con vista previa clicable en vivo y 3 estilos base predefinidos.
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Tiptap](https://img.shields.io/badge/Editor-Tiptap_v3-111827?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-4f46e5?style=flat-square)
+
+</div>
+
+---
+
+## Características principales
+
+### 📊 Dashboard (`/dashboard`)
+- **KPIs consolidados:** vistas del periodo con tendencia (`%`), tasa de publicación, borradores pendientes y promedio de vistas por artículo.
+- **Analítica por artículo y global:** gráfica de visitas en el tiempo (Recharts) filtrable por rango (`7d`, `30d`, `12m`), granularidad (`Día`, `Semana`) y **por publicación específica**.
+- **Salud editorial:** distribución por estado (donut), cadencia mensual (*Creados vs. Publicados*), top tags, recientes y ranking interactivo.
+
+### ✍️ Blogs y Editor WYSIWYG (`/blogs` y `/blogs/:postId`)
+- **Ciclo de 3 estados:** `BORRADOR` ↔ `PUBLICADO` ↔ `ARCHIVADO` (reversible), con checklist previa de validación al publicar.
+- **Guardado inteligente:** autoguardado *debounced* en `BORRADOR`, y respaldo local + confirmación explícita (**Actualizar publicación**) en `PUBLICADO` para evitar *rebuilds* innecesarios.
+- **Edición sobre la vista previa (`TemplateScope`):** énfasis en la sección activa (`ActiveBlock`), callouts (`info`, `tip`, `warning`, `danger`), código, citas, imágenes con pie de foto y `ReaderPreview` (escritorio y móvil).
+- **Inspector de 4 pestañas:** **Estilo** (color de texto, alineación, callout, plantilla), **Detalles** (tags, extracto, portada), **SEO** (slug + vista previa en buscadores) e **Índice** (métricas de lectura y salto a encabezados).
+
+### 🎨 Estudio de Plantillas (`/templates`)
+- **Design Tokens JSON:** nunca CSS libre; los mismos tokens estilizan el editor y cualquier sitio consumidor (Astro, Next.js, etc.).
+- **Editor interactivo:** vista previa clicable a la izquierda y controles por capas (**Colores**, **Tipografía**, **Layout**, **Bloques**) a la derecha, además de 3 estilos base predefinidos.
+
+---
+
+## Arquitectura
+
+```text
+src/
+├── app/        # Providers, React Router, ProtectedRoute, AppShell (Sidebar fijo + Topbar)
+├── core/       # env (Zod), httpClient (Axios + 401), normalizeApiError, authStore
+├── shared/     # UI primitivos, ErrorBoundary, Toaster, hooks y utilidades
+└── modules/
+    ├── dashboard/   # Métricas, gráficas Recharts y RankingTableCard
+    ├── blogs/       # Listado paginado, filtros, diálogos y editor Tiptap
+    └── templates/   # Galería, presets, tokensToCssVars y editor interactivo
+```
+
+---
 
 ## Desarrollo local
 
-### 1. Modo conectado al backend FastAPI
+### Opción 1: Conectado al backend FastAPI
 ```bash
 cp .env.example .env
 # Verifica VITE_API_URL=http://localhost:8000/api/v1 y VITE_ENABLE_MOCKS=false
@@ -28,7 +59,7 @@ npm install
 npm run dev
 ```
 
-### 2. Modo aislado (con mocks MSW)
+### Opción 2: Modo aislado con mocks MSW
 ```bash
 cp .env.example .env
 # Cambia VITE_ENABLE_MOCKS=true en .env
@@ -36,6 +67,8 @@ npx msw init public/ --save
 npm run dev
 ```
 Credenciales mock: `admin@example.com` / `Admin123!`.
+
+---
 
 ## Variables de entorno
 
@@ -46,18 +79,33 @@ Credenciales mock: `admin@example.com` / `Admin123!`.
 | `VITE_AUTOSAVE_DELAY_MS` | Debounce de autoguardado (ms) | `2000` |
 | `VITE_ENABLE_MOCKS` | Habilita MSW en desarrollo (`true`/`false`) | `false` |
 
+---
+
 ## Scripts
 
-- `npm run dev` — servidor de desarrollo
-- `npm run build` — `tsc -b && vite build`
-- `npm run typecheck` — verificación de tipos
-- `npm run lint` — ESLint (incluye reglas de fronteras entre módulos)
-- `npm run test` — Vitest + Testing Library + MSW
+| Comando | Acción |
+|---|---|
+| `npm run dev` | Inicia servidor de desarrollo (Vite) |
+| `npm run build` | Compila TypeScript y genera bundle de producción |
+| `npm run typecheck` | Verificación estricta de tipos (`tsc --noEmit`) |
+| `npm run lint` | ESLint (incluye reglas de fronteras entre módulos) |
+| `npm run test` | Pruebas unitarias e integración (Vitest + Testing Library + MSW) |
+
+---
 
 ## Despliegue (Vercel / Netlify)
 
 1. Importa este repositorio en **Vercel** o **Netlify** (incluye `vercel.json` y `public/_redirects` para enrutamiento SPA).
-2. Configura las variables de entorno de producción:
+2. Configura las variables de entorno:
    - `VITE_API_URL=https://<tu-backend>.onrender.com/api/v1`
    - `VITE_ENABLE_MOCKS=false`
-3. En el backend FastAPI, agrega el dominio desplegado de este panel en `CORS_ORIGINS` (ej. `https://cms-blogs.vercel.app,https://tu-portafolio.vercel.app`).
+3. Agrega el dominio de este panel en `CORS_ORIGINS` dentro del backend FastAPI.
+
+---
+
+## Licencia
+
+Distribuido bajo la licencia **MIT**. Consulta [LICENSE](./LICENSE) para más detalles.
+
+### Stack y licencias de terceros
+Construido sobre proyectos open-source con licencias permisivas (**MIT** / **Apache-2.0**): React, TypeScript, Vite, Tailwind CSS, TanStack Query, Zustand, Tiptap, Recharts, Zod, Axios, DOMPurify y Lucide Icons.
