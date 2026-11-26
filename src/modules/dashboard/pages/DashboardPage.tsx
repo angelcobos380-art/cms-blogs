@@ -9,7 +9,7 @@ import { ContentStatusChart } from '../components/ContentStatusChart';
 import { MetricCard } from '../components/MetricCard';
 import { PostsPerMonthChart } from '../components/PostsPerMonthChart';
 import { RecentPostsTable } from '../components/RecentPostsTable';
-import { TopPostsChart } from '../components/TopPostsChart';
+import { RankingTableCard } from '../components/RankingTableCard';
 import { TopTagsList } from '../components/TopTagsList';
 import { ViewsOverTimeChart } from '../components/ViewsOverTimeChart';
 import { useMetricsSummary } from '../hooks/useMetricsSummary';
@@ -128,14 +128,17 @@ export function DashboardPage() {
         <ContentStatusChart byStatus={byStatus} />
       </div>
 
-      {/* Cadencia mensual + Impacto por post + Tags & Recientes */}
+      {/* Cadencia mensual + Ranking Top + Tags & Recientes */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <PostsPerMonthChart data={summary.data?.posts_per_month ?? []} />
-        <TopPostsChart posts={summary.data?.top_posts ?? []} totalViews={totalViews} />
-        <div className="space-y-4">
-          <TopTagsList tags={summary.data?.top_tags ?? []} />
-          <RecentPostsTable />
+        <div className="lg:col-span-2">
+          <RankingTableCard posts={summary.data?.top_posts ?? []} totalViews={totalViews} />
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <TopTagsList tags={summary.data?.top_tags ?? []} />
+        <RecentPostsTable />
       </div>
     </div>
   );
