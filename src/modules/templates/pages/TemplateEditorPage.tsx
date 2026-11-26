@@ -12,7 +12,7 @@ import { TemplateLivePreview } from '../components/editor/TemplateLivePreview';
 import { TokensForm } from '../components/editor/TokensForm';
 import { useTemplate } from '../hooks/useTemplate';
 import { useTemplateMutations } from '../hooks/useTemplateMutations';
-import { DEFAULT_TEMPLATE_TOKENS, templateFormSchema } from '../schemas/template.schema';
+import { DEFAULT_TEMPLATE_TOKENS, TEMPLATE_PRESETS, templateFormSchema } from '../schemas/template.schema';
 import type { TemplateTokens } from '../types/template.types';
 
 export function TemplateEditorPage() {
@@ -98,6 +98,34 @@ export function TemplateEditorPage() {
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         <div className="lg:col-span-5 rounded-2xl border bg-[var(--card)] p-5 space-y-4">
+          {isNew && (
+            <div className="space-y-1.5 pb-3 border-b">
+              <span className="text-xs font-medium text-[var(--fg-muted)] block">
+                Comenzar desde un estilo base (opcional)
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {TEMPLATE_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => {
+                      if (!name.trim()) setName(preset.label);
+                      if (!description.trim()) setDescription(preset.description);
+                      setTokens(preset.tokens);
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border bg-[var(--bg-subtle)] px-2.5 py-1.5 text-xs hover:border-[var(--accent)] transition cursor-pointer"
+                  >
+                    <span
+                      className="h-2.5 w-2.5 rounded-full border"
+                      style={{ backgroundColor: preset.tokens.colors.accent }}
+                    />
+                    <span>{preset.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-1.5">
             <label htmlFor="tpl-name" className="text-xs font-medium text-[var(--fg-muted)]">
               Nombre de la plantilla

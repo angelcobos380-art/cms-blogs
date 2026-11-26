@@ -18,7 +18,7 @@ export function PostsListPage() {
   const initialStatus = searchParams.get('status');
   const initialTag = searchParams.get('tag') ?? '';
 
-  const [newPostOpen, setNewPostOpen] = useState(false);
+  const [newPostOpen, setNewPostOpen] = useState(searchParams.get('new') === '1');
   const [searchText, setSearchText] = useState('');
   const debouncedQuery = useDebounce(searchText, 300);
 

@@ -90,3 +90,118 @@ export const DEFAULT_TEMPLATE_TOKENS: TemplateTokens = {
     code: { radius: 10, showLanguageBadge: true },
   },
 };
+
+export const TEMPLATE_PRESETS: Array<{
+  id: string;
+  label: string;
+  description: string;
+  tokens: TemplateTokens;
+}> = [
+  {
+    id: 'editorial-minimal',
+    label: 'Editorial Minimal',
+    description: 'Tipografía serif en títulos, fondo claro y lectura aireada.',
+    tokens: {
+      ...DEFAULT_TEMPLATE_TOKENS,
+      colors: {
+        ...DEFAULT_TEMPLATE_TOKENS.colors,
+        accent: '#0ea5e9',
+        link: '#0369a1',
+      },
+      typography: {
+        ...DEFAULT_TEMPLATE_TOKENS.typography,
+        headingFont: "Georgia, 'Times New Roman', serif",
+      },
+      layout: {
+        ...DEFAULT_TEMPLATE_TOKENS.layout,
+        maxWidth: 700,
+        density: 'spacious',
+        headerStyle: 'editorial-centered',
+      },
+    },
+  },
+  {
+    id: 'dark-dev-glass',
+    label: 'Oscuro Dev Glass',
+    description: 'Estética oscura de alto contraste para artículos técnicos.',
+    tokens: {
+      version: 1,
+      colors: {
+        accent: '#e34b4e',
+        background: '#0b0a0b',
+        surface: '#1c191b',
+        text: '#f7f3f1',
+        textMuted: '#b6adab',
+        border: '#2e292b',
+        link: '#e34b4e',
+        codeBg: '#070607',
+      },
+      typography: {
+        headingFont: 'Inter, ui-sans-serif, system-ui, sans-serif',
+        bodyFont: 'Inter, ui-sans-serif, system-ui, sans-serif',
+        codeFont: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+        baseSize: 17,
+        lineHeight: 1.8,
+      },
+      layout: {
+        maxWidth: 780,
+        density: 'comfortable',
+        headerStyle: 'minimal',
+        imageRadius: 12,
+        shadow: 'soft',
+      },
+      blocks: {
+        callout: {
+          info: { bg: '#172536', border: '#38bdf8' },
+          tip: { bg: '#14291f', border: '#22c55e' },
+          warning: { bg: '#2e2412', border: '#eab308' },
+          danger: { bg: '#311619', border: '#e34b4e' },
+        },
+        quote: { borderColor: '#e34b4e', style: 'italic' },
+        code: { radius: 12, showLanguageBadge: true },
+      },
+    },
+  },
+  {
+    id: 'cuaderno-calido',
+    label: 'Cuaderno Cálido',
+    description: 'Fondo crema y acento terracota para ensayos y bitácoras.',
+    tokens: {
+      version: 1,
+      colors: {
+        accent: '#c2410c',
+        background: '#faf7f2',
+        surface: '#f3ede2',
+        text: '#292524',
+        textMuted: '#57534e',
+        border: '#e7e0d3',
+        link: '#c2410c',
+        codeBg: '#1c1917',
+      },
+      typography: {
+        headingFont: 'Georgia, serif',
+        bodyFont: 'Georgia, serif',
+        codeFont: 'ui-monospace, Menlo, monospace',
+        baseSize: 17,
+        lineHeight: 1.8,
+      },
+      layout: {
+        maxWidth: 680,
+        density: 'comfortable',
+        headerStyle: 'banner',
+        imageRadius: 16,
+        shadow: 'soft',
+      },
+      blocks: {
+        callout: {
+          info: { bg: '#e0f2fe', border: '#0284c7' },
+          tip: { bg: '#ecfccb', border: '#65a30d' },
+          warning: { bg: '#ffedd5', border: '#ea580c' },
+          danger: { bg: '#fee2e2', border: '#dc2626' },
+        },
+        quote: { borderColor: '#c2410c', style: 'italic' },
+        code: { radius: 12, showLanguageBadge: true },
+      },
+    },
+  },
+];
