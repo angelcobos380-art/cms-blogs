@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { EditorContent, useEditor, type JSONContent } from '@tiptap/react';
+import { EditorContent, useEditor, type Editor, type JSONContent } from '@tiptap/react';
 import type { TemplateTokens } from '@templates';
 import { AddSectionBar } from './blocks/AddSectionBar';
 import { BlockControls } from './blocks/BlockControls';
@@ -16,6 +16,7 @@ interface RichEditorProps {
   tags: string[];
   coverImageUrl?: string | null;
   readOnly?: boolean;
+  onEditorReady?: (editor: Editor | null) => void;
   onTitleChange: (title: string) => void;
   onDocChange: (doc: JSONContent, html: string) => void;
 }
@@ -27,6 +28,7 @@ export function RichEditor({
   tags,
   coverImageUrl,
   readOnly = false,
+  onEditorReady,
   onTitleChange,
   onDocChange,
 }: RichEditorProps) {
@@ -40,6 +42,10 @@ export function RichEditor({
     onCreate: ({ editor: instance }) => {
       const json = instance.getJSON();
       setStats(countWordsFromDoc(json), extractOutline(json));
+      onEditorReady?.(instance);
+    },
+    onDestroy: () => {
+      onEditorReady?.(null);
     },
     onSelectionUpdate: () => {
       setSelectionTick((t) => t + 1);

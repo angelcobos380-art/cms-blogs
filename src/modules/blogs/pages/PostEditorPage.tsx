@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type { JSONContent } from '@tiptap/react';
+import type { Editor, JSONContent } from '@tiptap/react';
 import { ArrowLeft, Eye, Monitor, PanelRight, Send, Smartphone, Undo2 } from 'lucide-react';
 import { ROUTES } from '@app/router/routes';
 import { normalizeApiError } from '@core/api/errors';
@@ -38,6 +38,7 @@ export function PostEditorPage() {
   const toggleInspector = useEditorStore((s) => s.toggleInspector);
   const resetEditor = useEditorStore((s) => s.reset);
 
+  const [editorInstance, setEditorInstance] = useState<Editor | null>(null);
   const [publishOpen, setPublishOpen] = useState(false);
   const [draft, setDraft] = useState<{
     postId: string;
@@ -242,6 +243,7 @@ export function PostEditorPage() {
               tags={draft.tags}
               coverImageUrl={draft.cover_image_url}
               readOnly={isArchived}
+              onEditorReady={setEditorInstance}
               onTitleChange={(title) => {
                 setDraft((prev) => (prev ? { ...prev, title } : prev));
                 queueChange({ title });
@@ -273,6 +275,7 @@ export function PostEditorPage() {
 
         {mode === 'edit' && inspectorOpen && (
           <InspectorPanel
+            editor={editorInstance}
             slug={draft.slug}
             publishedAt={post.published_at}
             tags={draft.tags}
