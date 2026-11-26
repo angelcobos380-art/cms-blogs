@@ -431,6 +431,21 @@ export function InspectorPanel({
               className="w-full rounded-lg border bg-[var(--bg)] p-2 text-xs text-[var(--fg)]"
             />
           </div>
+
+          <div className="rounded-xl border bg-[var(--bg-subtle)] p-3 space-y-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--fg-muted)]">
+              Vista previa en buscadores
+            </p>
+            <p className="text-[11px] text-[var(--success)] font-mono truncate">
+              https://tublog.com/blog/{slug || 'articulo'}
+            </p>
+            <p className="text-xs font-semibold text-[var(--accent)] truncate">
+              {seo.title || 'Título del artículo'}
+            </p>
+            <p className="text-[11px] text-[var(--fg-muted)] line-clamp-2">
+              {seo.description || excerpt || 'Añade una meta descripción para mejorar el CTR en buscadores.'}
+            </p>
+          </div>
         </div>
       )}
     </aside>
