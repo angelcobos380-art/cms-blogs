@@ -34,6 +34,28 @@ export function markdownToTiptapDoc(markdown: string | null | undefined): JSONCo
       continue;
     }
 
+    const calloutMatch = /^>\s*\[!(INFO|TIP|WARNING|DANGER)\]\s*$/i.exec(line);
+    if (calloutMatch) {
+      const variant = calloutMatch[1].toLowerCase();
+      const calloutLines: string[] = [];
+      i += 1;
+      while (i < lines.length && lines[i].startsWith('>')) {
+        calloutLines.push(lines[i].replace(/^>\s?/, '').trim());
+        i += 1;
+      }
+      blocks.push({
+        type: 'callout',
+        attrs: { variant },
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: calloutLines.join(' ') || 'Nota destacada' }],
+          },
+        ],
+      });
+      continue;
+    }
+
     const headingMatch = /^(#{1,3})\s+(.+)$/.exec(line);
     if (headingMatch) {
       const level = Math.min(3, Math.max(2, headingMatch[1].length));
