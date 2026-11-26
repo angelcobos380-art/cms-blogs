@@ -17,18 +17,18 @@ Panel de administración headless en **React 19 + TypeScript + Vite**, diseñado
 
 ## Características principales
 
-### 📊 Dashboard (`/dashboard`)
+### Dashboard (`/dashboard`)
 - **KPIs consolidados:** vistas del periodo con tendencia (`%`), tasa de publicación, borradores pendientes y promedio de vistas por artículo.
 - **Analítica por artículo y global:** gráfica de visitas en el tiempo (Recharts) filtrable por rango (`7d`, `30d`, `12m`), granularidad (`Día`, `Semana`) y **por publicación específica**.
 - **Salud editorial:** distribución por estado (donut), cadencia mensual (*Creados vs. Publicados*), top tags, recientes y ranking interactivo.
 
-### ✍️ Blogs y Editor WYSIWYG (`/blogs` y `/blogs/:postId`)
+### Blogs y Editor WYSIWYG (`/blogs` y `/blogs/:postId`)
 - **Ciclo de 3 estados:** `BORRADOR` ↔ `PUBLICADO` ↔ `ARCHIVADO` (reversible), con checklist previa de validación al publicar.
 - **Guardado inteligente:** autoguardado *debounced* en `BORRADOR`, y respaldo local + confirmación explícita (**Actualizar publicación**) en `PUBLICADO` para evitar *rebuilds* innecesarios.
 - **Edición sobre la vista previa (`TemplateScope`):** énfasis en la sección activa (`ActiveBlock`), callouts (`info`, `tip`, `warning`, `danger`), código, citas, imágenes con pie de foto y `ReaderPreview` (escritorio y móvil).
 - **Inspector de 4 pestañas:** **Estilo** (color de texto, alineación, callout, plantilla), **Detalles** (tags, extracto, portada), **SEO** (slug + vista previa en buscadores) e **Índice** (métricas de lectura y salto a encabezados).
 
-### 🎨 Estudio de Plantillas (`/templates`)
+### Estudio de Plantillas (`/templates`)
 - **Design Tokens JSON:** nunca CSS libre; los mismos tokens estilizan el editor y cualquier sitio consumidor (Astro, Next.js, etc.).
 - **Editor interactivo:** vista previa clicable a la izquierda y controles por capas (**Colores**, **Tipografía**, **Layout**, **Bloques**) a la derecha, además de 3 estilos base predefinidos.
 
