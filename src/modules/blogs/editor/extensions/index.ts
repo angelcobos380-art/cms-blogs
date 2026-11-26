@@ -4,6 +4,8 @@ import Placeholder from '@tiptap/extension-placeholder';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle } from '@tiptap/extension-text-style';
 import StarterKit from '@tiptap/starter-kit';
+import { Callout } from './Callout';
+import { ImageWithCaption } from './ImageWithCaption';
 
 export function createEditorExtensions() {
   return [
@@ -22,6 +24,8 @@ export function createEditorExtensions() {
         loading: 'lazy',
       },
     }),
+    ImageWithCaption,
+    Callout,
     TextStyle,
     Color,
     TextAlign.configure({

@@ -42,6 +42,13 @@ function serializeNode(node: JSONContent): string {
       return (node.content ?? [])
         .map((child) => `> ${serializeNode(child)}`)
         .join('\n');
+    case 'callout': {
+      const variant = String(node.attrs?.variant ?? 'info').toUpperCase();
+      const body = (node.content ?? [])
+        .map((child) => `> ${serializeNode(child)}`)
+        .join('\n');
+      return `> [!${variant}]\n${body}`;
+    }
     case 'codeBlock': {
       const lang = String(node.attrs?.language ?? '');
       const code = (node.content ?? []).map((c) => c.text ?? '').join('');
@@ -49,8 +56,9 @@ function serializeNode(node: JSONContent): string {
     }
     case 'horizontalRule':
       return '---';
-    case 'image': {
-      const alt = String(node.attrs?.alt ?? '');
+    case 'image':
+    case 'imageWithCaption': {
+      const alt = String(node.attrs?.alt ?? node.attrs?.caption ?? '');
       const src = String(node.attrs?.src ?? '');
       return `![${alt}](${src})`;
     }
