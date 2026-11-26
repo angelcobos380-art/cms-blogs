@@ -15,4 +15,22 @@ export default defineConfig({
       '@templates': path.resolve(__dirname, 'src/modules/templates'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
+          tiptap: [
+            '@tiptap/react',
+            '@tiptap/starter-kit',
+            '@tiptap/extension-image',
+            '@tiptap/extension-text-align',
+            '@tiptap/extension-color',
+            '@tiptap/extension-text-style',
+          ],
+          recharts: ['recharts'],
+        },
+      },
+    },
+  },
 });

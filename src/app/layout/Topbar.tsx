@@ -1,16 +1,33 @@
-import { LogOut, Moon, Sun } from 'lucide-react';
+import { LogOut, Menu, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@core/auth/useAuth';
 import { Button } from '@shared/components/ui/button';
 import { useThemeStore } from '@shared/hooks/useTheme';
 
-export function Topbar() {
+interface TopbarProps {
+  onOpenMobileMenu?: () => void;
+}
+
+export function Topbar({ onOpenMobileMenu }: TopbarProps) {
   const { user, logout } = useAuth();
   const theme = useThemeStore((s) => s.theme);
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
 
   return (
-    <header className="h-14 border-b bg-[var(--card)] px-6 flex items-center justify-between gap-4">
-      <div className="text-xs text-[var(--fg-muted)]">Panel de administración</div>
+    <header className="h-14 border-b bg-[var(--card)] px-4 md:px-6 flex items-center justify-between gap-4">
+      <div className="flex items-center gap-2">
+        {onOpenMobileMenu && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={onOpenMobileMenu}
+            aria-label="Abrir menú"
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
+        )}
+        <span className="text-xs text-[var(--fg-muted)]">Panel de administración</span>
+      </div>
 
       <div className="flex items-center gap-2">
         <Button
