@@ -16,6 +16,7 @@ interface ToastState {
   dismiss: (id: string) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToastStore = create<ToastState>((set) => ({
   items: [],
   push: (message, tone = 'info') => {
@@ -28,6 +29,7 @@ export const useToastStore = create<ToastState>((set) => ({
   dismiss: (id) => set((s) => ({ items: s.items.filter((t) => t.id !== id) })),
 }));
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const toast = {
   info: (msg: string) => useToastStore.getState().push(msg, 'info'),
   success: (msg: string) => useToastStore.getState().push(msg, 'success'),

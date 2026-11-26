@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw';
+import type { Post } from '@blogs';
 import { slugify } from '@shared/lib/slug';
 
 const API = 'http://localhost:8000/api/v1';
@@ -58,7 +59,7 @@ export const mockTemplates = [
   },
 ];
 
-export const mockPosts = [
+export const mockPosts: Post[] = [
   {
     post_id: '019a-post-01',
     slug: 'arquitectura-cms-headless',
@@ -153,7 +154,7 @@ export const handlers = [
 
   http.post(`${API}/posts`, async ({ request }) => {
     const body = (await request.json()) as { title: string; template_id?: string | null };
-    const created = {
+    const created: Post = {
       post_id: `019a-post-${Date.now()}`,
       slug: slugify(body.title) || `borrador-${Date.now()}`,
       title: body.title,
