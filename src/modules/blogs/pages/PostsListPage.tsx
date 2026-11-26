@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { normalizeApiError } from '@core/api/errors';
 import { EmptyState } from '@shared/components/EmptyState';
@@ -13,13 +14,20 @@ import { usePosts } from '../hooks/usePosts';
 import type { PostStatus, PostsFilters as PostsFiltersType } from '../types/post.types';
 
 export function PostsListPage() {
+  const [searchParams] = useSearchParams();
+  const initialStatus = searchParams.get('status');
+  const initialTag = searchParams.get('tag') ?? '';
+
   const [newPostOpen, setNewPostOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
   const debouncedQuery = useDebounce(searchText, 300);
 
   const [filters, setFilters] = useState<PostsFiltersType>({
-    status: 'ALL',
-    tag: '',
+    status:
+      initialStatus === 'BORRADOR' || initialStatus === 'PUBLICADO' || initialStatus === 'ARCHIVADO'
+        ? initialStatus
+        : 'ALL',
+    tag: initialTag,
     sort: '-updated_at',
     page: 1,
     page_size: 20,
