@@ -13,11 +13,20 @@ export function computeDateRange(range: ViewsRange): { from: string; to: string 
   };
 }
 
-export function useViewsSeries(range: ViewsRange, granularity: ViewsGranularity) {
+export function useViewsSeries(
+  range: ViewsRange,
+  granularity: ViewsGranularity,
+  postId?: string,
+) {
   const bounds = useMemo(() => computeDateRange(range), [range]);
 
   return useQuery({
-    queryKey: metricsKeys.views({ ...bounds, granularity }),
-    queryFn: () => metricsApi.views({ ...bounds, granularity }),
+    queryKey: metricsKeys.views({ ...bounds, granularity, postId: postId || undefined }),
+    queryFn: () =>
+      metricsApi.views({
+        ...bounds,
+        granularity,
+        post_id: postId || undefined,
+      }),
   });
 }

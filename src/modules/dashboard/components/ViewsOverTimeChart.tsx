@@ -13,6 +13,9 @@ interface ViewsOverTimeChartProps {
   series: Array<{ date: string; views: number }>;
   range: ViewsRange;
   granularity: ViewsGranularity;
+  selectedPostId: string;
+  posts: Array<{ post_id: string; title: string }>;
+  onPostChange: (postId: string) => void;
   onRangeChange: (range: ViewsRange) => void;
   onGranularityChange: (granularity: ViewsGranularity) => void;
 }
@@ -21,6 +24,9 @@ export function ViewsOverTimeChart({
   series,
   range,
   granularity,
+  selectedPostId,
+  posts,
+  onPostChange,
   onRangeChange,
   onGranularityChange,
 }: ViewsOverTimeChartProps) {
@@ -44,6 +50,20 @@ export function ViewsOverTimeChart({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-xs">
+          <select
+            aria-label="Filtrar visitas por artículo"
+            value={selectedPostId}
+            onChange={(e) => onPostChange(e.target.value)}
+            className="h-8 max-w-[190px] rounded-lg border bg-[var(--bg)] px-2 text-xs text-[var(--fg)]"
+          >
+            <option value="">Todos los artículos</option>
+            {posts.map((p) => (
+              <option key={p.post_id} value={p.post_id}>
+                {p.title}
+              </option>
+            ))}
+          </select>
+
           <div className="inline-flex rounded-lg border bg-[var(--bg-subtle)] p-0.5">
             {(['7d', '30d', '12m'] as ViewsRange[]).map((r) => (
               <button
