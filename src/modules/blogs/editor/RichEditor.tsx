@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { EditorContent, useEditor, type JSONContent } from '@tiptap/react';
 import type { TemplateTokens } from '@templates';
+import { AddSectionBar } from './blocks/AddSectionBar';
+import { BlockControls } from './blocks/BlockControls';
 import { useEditorStore } from './editor.store';
 import { createEditorExtensions } from './extensions';
 import { countWordsFromDoc, extractOutline } from './serializers';
@@ -29,6 +31,7 @@ export function RichEditor({
   onDocChange,
 }: RichEditorProps) {
   const setStats = useEditorStore((s) => s.setStats);
+  const [, setSelectionTick] = useState(0);
 
   const editor = useEditor({
     extensions: createEditorExtensions(),
@@ -37,6 +40,9 @@ export function RichEditor({
     onCreate: ({ editor: instance }) => {
       const json = instance.getJSON();
       setStats(countWordsFromDoc(json), extractOutline(json));
+    },
+    onSelectionUpdate: () => {
+      setSelectionTick((t) => t + 1);
     },
     onUpdate: ({ editor: instance }) => {
       const json = instance.getJSON();
@@ -56,6 +62,7 @@ export function RichEditor({
   return (
     <div className="space-y-3">
       <EditorToolbar editor={editor} disabled={readOnly} />
+      <BlockControls editor={editor} disabled={readOnly} />
 
       <TemplateScope tokens={tokens}>
         <header className={isCentered ? 'text-center space-y-3 pb-6 border-b' : 'space-y-3 pb-6 border-b'}>
@@ -97,6 +104,8 @@ export function RichEditor({
         <div className="pt-2">
           <EditorContent editor={editor} />
         </div>
+
+        <AddSectionBar editor={editor} disabled={readOnly} />
       </TemplateScope>
     </div>
   );
