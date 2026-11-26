@@ -236,12 +236,117 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.get(`${API}/templates`, () => {
+  http.get(`${API}/templates`, ({ request }) => {
+    const url = new URL(request.url);
+    const status = url.searchParams.get('status');
+    const q = url.searchParams.get('q')?.toLowerCase() ?? '';
+    const items = mockTemplates.filter((t) => {
+      if (status && status !== 'ALL' && t.status !== status) return false;
+      if (q && !t.name.toLowerCase().includes(q)) return false;
+      return true;
+    });
     return HttpResponse.json({
-      items: mockTemplates,
-      total: mockTemplates.length,
+      items,
+      total: items.length,
       page: 1,
       page_size: 20,
+    });
+  }),
+
+  http.post(`${API}/templates`, async ({ request }) => {
+    const body = (await request.json()) as {
+      name: string;
+      description?: string;
+      tokens: (typeof mockTemplates)[0]['tokens'];
+    };
+    const created = {
+      template_id: `019a-tpl-${Date.now()}`,
+      name: body.name,
+      description: body.description ?? '',
+      status: 'ACTIVA',
+      is_default: false,
+      tokens: body.tokens,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    mockTemplates.push(created);
+    return HttpResponse.json(created, { status: 201 });
+  }),
+
+  http.get(`${API}/templates/:id`, ({ params }) => {
+    const found = mockTemplates.find((t) => t.template_id === params.id);
+    if (!found) return HttpResponse.json({ detail: 'Plantilla no encontrada.' }, { status: 404 });
+    return HttpResponse.json(found);
+  }),
+
+  http.put(`${API}/templates/:id`, async ({ params, request }) => {
+    const found = mockTemplates.find((t) => t.template_id === params.id);
+    if (!found) return HttpResponse.json({ detail: 'Plantilla no encontrada.' }, { status: 404 });
+    const body = (await request.json()) as Record<string, unknown>;
+    Object.assign(found, body, { updated_at: new Date().toISOString() });
+    return HttpResponse.json(found);
+  }),
+
+  http.post(`${API}/templates/:id/duplicate`, ({ params }) => {
+    const orig = mockTemplates.find((t) => t.template_id === params.id);
+    if (!orig) return HttpResponse.json({ detail: 'Plantilla no encontrada.' }, { status: 404 });
+    const copy = {
+      ...JSON.parse(JSON.stringify(orig)),
+      template_id: `019a-tpl-${Date.now()}`,
+      name: `${orig.name} (copia)`,
+      is_default: false,
+    };
+    mockTemplates.push(copy);
+    return HttpResponse.json(copy, { status: 201 });
+  }),
+
+  http.post(`${API}/templates/:id/set-default`, ({ params }) => {
+    const found = mockTemplates.find((t) => t.template_id === params.id);
+    if (!found) return HttpResponse.json({ detail: 'Plantilla no encontrada.' }, { status: 404 });
+    mockTemplates.forEach((t) => {
+      t.is_default = t.template_id === found.template_id;
+    });
+    return HttpResponse.json(found);
+  }),
+
+  http.post(`${API}/templates/:id/archive`, ({ params }) => {
+    const found = mockTemplates.find((t) => t.template_id === params.id);
+    if (!found) return HttpResponse.json({ detail: 'Plantilla no encontrada.' }, { status: 404 });
+    found.status = 'ARCHIVADA';
+    found.is_default = false;
+    return HttpResponse.json(found);
+  }),
+
+  http.post(`${API}/templates/:id/restore`, ({ params }) => {
+    const found = mockTemplates.find((t) => t.template_id === params.id);
+    if (!found) return HttpResponse.json({ detail: 'Plantilla no encontrada.' }, { status: 404 });
+    found.status = 'ACTIVA';
+    return HttpResponse.json(found);
+  }),
+
+  http.delete(`${API}/templates/:id`, ({ params }) => {
+    const idx = mockTemplates.findIndex((t) => t.template_id === params.id);
+    if (idx === -1) return HttpResponse.json({ detail: 'Plantilla no encontrada.' }, { status: 404 });
+    mockTemplates.splice(idx, 1);
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  http.get(`${API}/metrics/views`, ({ request }) => {
+    const url = new URL(request.url);
+    const from = url.searchParams.get('from') ?? '2026-11-01';
+    const to = url.searchParams.get('to') ?? '2026-11-25';
+    const granularity = url.searchParams.get('granularity') ?? 'day';
+    return HttpResponse.json({
+      from,
+      to,
+      granularity,
+      series: [
+        { date: '2026-11-21', views: 8 },
+        { date: '2026-11-22', views: 12 },
+        { date: '2026-11-23', views: 5 },
+        { date: '2026-11-24', views: 10 },
+        { date: '2026-11-25', views: 7 },
+      ],
     });
   }),
 
