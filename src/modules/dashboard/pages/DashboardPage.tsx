@@ -8,8 +8,8 @@ import { Button } from '@shared/components/ui/button';
 import { ContentStatusChart } from '../components/ContentStatusChart';
 import { MetricCard } from '../components/MetricCard';
 import { PostsPerMonthChart } from '../components/PostsPerMonthChart';
+import { RankingTableCard } from '../components/RankingTableCard';
 import { RecentPostsTable } from '../components/RecentPostsTable';
-import { TopPostsChart } from '../components/TopPostsChart';
 import { TopTagsList } from '../components/TopTagsList';
 import { ViewsOverTimeChart } from '../components/ViewsOverTimeChart';
 import { useMetricsSummary } from '../hooks/useMetricsSummary';
@@ -33,18 +33,27 @@ export function DashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const rangeParam = searchParams.get('range');
   const granularityParam = searchParams.get('granularity');
+  const selectedPostId = searchParams.get('post') ?? '';
 
   const range: ViewsRange =
     rangeParam === '7d' || rangeParam === '30d' || rangeParam === '12m' ? rangeParam : '30d';
   const granularity: ViewsGranularity = granularityParam === 'week' ? 'week' : 'day';
 
-  const summary = useMetricsSummary(12, 5);
-  const views = useViewsSeries(range, granularity);
+  const summary = useMetricsSummary(12, 10);
+  const views = useViewsSeries(range, granularity, selectedPostId || undefined);
 
-  const updateQuery = (next: { range?: ViewsRange; granularity?: ViewsGranularity }) => {
+  const updateQuery = (next: {
+    range?: ViewsRange;
+    granularity?: ViewsGranularity;
+    post?: string;
+  }) => {
     const params = new URLSearchParams(searchParams);
     if (next.range) params.set('range', next.range);
     if (next.granularity) params.set('granularity', next.granularity);
+    if (next.post !== undefined) {
+      if (next.post) params.set('post', next.post);
+      else params.delete('post');
+    }
     setSearchParams(params, { replace: true });
   };
 
@@ -52,6 +61,7 @@ export function DashboardPage() {
   const byStatus = totals?.by_status ?? { BORRADOR: 0, PUBLICADO: 0, ARCHIVADO: 0 };
   const totalPosts = totals?.posts ?? 0;
   const totalViews = totals?.views ?? 0;
+  const activeTagsCount = summary.data?.top_tags.length ?? 0;
   const publishRate = totalPosts > 0 ? Math.round((byStatus.PUBLICADO / totalPosts) * 100) : 0;
   const avgViewsPerPublished =
     byStatus.PUBLICADO > 0 ? Math.round(totalViews / byStatus.PUBLICADO) : 0;
@@ -59,12 +69,13 @@ export function DashboardPage() {
   const series = views.data?.series ?? [];
   const periodViews = series.reduce((a, b) => a + b.views, 0);
   const trendDelta = computeTrendDelta(series);
+  const topPosts = summary.data?.top_posts ?? [];
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <PageHeader
         title="Dashboard"
-        description="Rendimiento editorial, alcance de artículos y estado de tu contenido."
+        description="Rendimiento de artículos, audiencia por publicación y estado editorial."
         actions={
           <Link to={`${ROUTES.BLOGS}?new=1`}>
             <Button size="sm">
@@ -82,19 +93,19 @@ export function DashboardPage() {
         />
       )}
 
-      {/* 4 KPI Scorecards accionables */}
+      {/* 4 KPI Scorecards consolidados */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           label={`Vistas (${range})`}
           value={periodViews}
           delta={trendDelta}
-          hint={`${totalViews} vistas acumuladas`}
+          hint={`${totalViews} vistas totales acumuladas`}
           icon={<Eye className="h-4 w-4 text-[var(--accent)]" />}
         />
         <MetricCard
           label="Tasa de publicación"
           value={`${publishRate}%`}
-          hint={`${byStatus.PUBLICADO} de ${totalPosts} artículos en vivo`}
+          hint={`${byStatus.PUBLICADO} de ${totalPosts} artículos · ${activeTagsCount} tags`}
           icon={<CheckCircle2 className="h-4 w-4 text-[var(--success)]" />}
           to={`${ROUTES.BLOGS}?status=PUBLICADO`}
         />
@@ -113,13 +124,16 @@ export function DashboardPage() {
         />
       </div>
 
-      {/* Gráfica de visitas + Salud editorial (Donut) */}
+      {/* Gráfica de visitas (global o por artículo) + Salud editorial */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <ViewsOverTimeChart
             series={series}
             range={range}
             granularity={granularity}
+            selectedPostId={selectedPostId}
+            posts={topPosts}
+            onPostChange={(post) => updateQuery({ post })}
             onRangeChange={(r) => updateQuery({ range: r })}
             onGranularityChange={(g) => updateQuery({ granularity: g })}
           />
@@ -128,15 +142,20 @@ export function DashboardPage() {
         <ContentStatusChart byStatus={byStatus} />
       </div>
 
-      {/* Cadencia mensual + Impacto por post + Tags & Recientes */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Cadencia mensual + Tags + Recientes */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
         <PostsPerMonthChart data={summary.data?.posts_per_month ?? []} />
-        <TopPostsChart posts={summary.data?.top_posts ?? []} totalViews={totalViews} />
-        <div className="space-y-4">
-          <TopTagsList tags={summary.data?.top_tags ?? []} />
-          <RecentPostsTable />
-        </div>
+        <TopTagsList tags={summary.data?.top_tags ?? []} />
+        <RecentPostsTable />
       </div>
+
+      {/* Ranking Top al final a ancho completo */}
+      <RankingTableCard
+        posts={topPosts}
+        totalViews={totalViews}
+        selectedPostId={selectedPostId}
+        onSelectPost={(post) => updateQuery({ post })}
+      />
     </div>
   );
 }

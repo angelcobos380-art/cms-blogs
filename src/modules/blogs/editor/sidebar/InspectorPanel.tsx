@@ -20,7 +20,7 @@ import type { SeoMeta } from '../../types/post.types';
 import { useEditorStore } from '../editor.store';
 import type { CalloutVariant } from '../extensions/Callout';
 
-type InspectorTab = 'style' | 'details' | 'seo';
+type InspectorTab = 'style' | 'details' | 'seo' | 'index';
 
 const COLOR_SWATCHES = ['#111827', '#4f46e5', '#0ea5e9', '#16a34a', '#d97706', '#dc2626'];
 
@@ -94,6 +94,25 @@ export function InspectorPanel({
   };
 
   const readMinutes = Math.max(1, Math.ceil(wordCount / 200));
+  const docJson = editor?.getJSON();
+  const totalBlocks = docJson?.content?.length ?? 0;
+  const codeBlocks = (docJson?.content ?? []).filter((n) => n.type === 'codeBlock').length;
+
+  const jumpToHeading = (headingText: string) => {
+    if (!editor) return;
+    let foundPos: number | null = null;
+    editor.state.doc.descendants((node, pos) => {
+      if (foundPos !== null) return false;
+      if (node.type.name === 'heading' && node.textContent.trim() === headingText) {
+        foundPos = pos + 1;
+        return false;
+      }
+      return true;
+    });
+    if (foundPos !== null) {
+      editor.chain().focus().setTextSelection(foundPos).scrollIntoView().run();
+    }
+  };
   const selectedTemplate =
     templates.find((t) => t.template_id === templateId) ??
     templates.find((t) => t.is_default) ??
@@ -114,12 +133,13 @@ export function InspectorPanel({
       </div>
 
       {/* Tabs */}
-      <div className="grid grid-cols-3 rounded-xl border bg-[var(--bg-subtle)] p-1 gap-1">
+      <div className="grid grid-cols-4 rounded-xl border bg-[var(--bg-subtle)] p-1 gap-1">
         {(
           [
             { id: 'style', label: 'Estilo' },
             { id: 'details', label: 'Detalles' },
             { id: 'seo', label: 'SEO' },
+            { id: 'index', label: 'Índice' },
           ] as Array<{ id: InspectorTab; label: string }>
         ).map((item) => (
           <button
@@ -430,6 +450,69 @@ export function InspectorPanel({
               placeholder="Meta descripción…"
               className="w-full rounded-lg border bg-[var(--bg)] p-2 text-xs text-[var(--fg)]"
             />
+          </div>
+
+          <div className="rounded-xl border bg-[var(--bg-subtle)] p-3 space-y-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--fg-muted)]">
+              Vista previa en buscadores
+            </p>
+            <p className="text-[11px] text-[var(--success)] font-mono truncate">
+              https://tublog.com/blog/{slug || 'articulo'}
+            </p>
+            <p className="text-xs font-semibold text-[var(--accent)] truncate">
+              {seo.title || 'Título del artículo'}
+            </p>
+            <p className="text-[11px] text-[var(--fg-muted)] line-clamp-2">
+              {seo.description || excerpt || 'Añade una meta descripción para mejorar el CTR en buscadores.'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: ÍNDICE (métricas de bloques + navegación rápida a encabezados) */}
+      {tab === 'index' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-xl border bg-[var(--bg-subtle)] p-3">
+              <p className="text-lg font-bold tabular-nums">{wordCount}</p>
+              <p className="text-[11px] text-[var(--fg-muted)]">Palabras</p>
+            </div>
+            <div className="rounded-xl border bg-[var(--bg-subtle)] p-3">
+              <p className="text-lg font-bold tabular-nums">{readMinutes} min</p>
+              <p className="text-[11px] text-[var(--fg-muted)]">Lectura est.</p>
+            </div>
+            <div className="rounded-xl border bg-[var(--bg-subtle)] p-3">
+              <p className="text-lg font-bold tabular-nums">{codeBlocks}</p>
+              <p className="text-[11px] text-[var(--fg-muted)]">Bloques código</p>
+            </div>
+            <div className="rounded-xl border bg-[var(--bg-subtle)] p-3">
+              <p className="text-lg font-bold tabular-nums">{totalBlocks}</p>
+              <p className="text-[11px] text-[var(--fg-muted)]">Total bloques</p>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-2 border-t">
+            <p className="font-medium text-[var(--fg-muted)]">Estructura del artículo (H2 / H3)</p>
+            {outline.length === 0 ? (
+              <p className="text-[var(--fg-muted)] italic">
+                Añade subtítulos H2 o H3 para navegar rápidamente por el artículo.
+              </p>
+            ) : (
+              <div className="space-y-1">
+                {outline.map((h, i) => (
+                  <button
+                    key={`${h.text}-${i}`}
+                    type="button"
+                    onClick={() => jumpToHeading(h.text)}
+                    className="w-full text-left rounded-lg px-2.5 py-1.5 hover:bg-[var(--bg-subtle)] hover:text-[var(--accent)] transition truncate cursor-pointer"
+                    style={{ paddingLeft: h.level === 3 ? 20 : 10 }}
+                  >
+                    {h.level === 3 ? '↳ ' : ''}
+                    {h.text}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

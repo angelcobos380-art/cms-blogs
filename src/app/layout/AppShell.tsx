@@ -16,9 +16,9 @@ export function AppShell() {
   }, [mobileOpen]);
 
   return (
-    <div className="min-h-screen flex bg-[var(--bg)] text-[var(--fg)]">
+    <div className="h-screen overflow-hidden flex bg-[var(--bg)] text-[var(--fg)]">
       <Sidebar mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
         <Topbar onOpenMobileMenu={() => setMobileOpen(true)} />
         <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           <Outlet />
