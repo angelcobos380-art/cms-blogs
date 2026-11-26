@@ -148,7 +148,7 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
     <>
       <aside
         className={cn(
-          'hidden md:flex shrink-0 border-r bg-[var(--sidebar)] flex-col transition-all duration-150',
+          'hidden md:flex h-screen shrink-0 border-r bg-[var(--sidebar)] flex-col overflow-y-auto transition-[width] duration-150',
           collapsed ? 'w-[72px]' : 'w-64',
         )}
       >
