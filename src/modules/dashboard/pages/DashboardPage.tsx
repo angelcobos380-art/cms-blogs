@@ -6,6 +6,7 @@ import { ErrorState } from '@shared/components/ErrorState';
 import { PageHeader } from '@shared/components/PageHeader';
 import { Button } from '@shared/components/ui/button';
 import { ContentStatusChart } from '../components/ContentStatusChart';
+import { GlobalSummaryCard } from '../components/GlobalSummaryCard';
 import { MetricCard } from '../components/MetricCard';
 import { PostsPerMonthChart } from '../components/PostsPerMonthChart';
 import { RecentPostsTable } from '../components/RecentPostsTable';
@@ -127,6 +128,17 @@ export function DashboardPage() {
 
         <ContentStatusChart byStatus={byStatus} />
       </div>
+
+      {/* Resumen Global consolidado */}
+      <GlobalSummaryCard
+        totalPosts={totalPosts}
+        publishedPosts={byStatus.PUBLICADO}
+        draftPosts={byStatus.BORRADOR}
+        totalViews={totalViews}
+        activeTagsCount={summary.data?.top_tags.length ?? 0}
+        avgViewsPerPost={avgViewsPerPublished}
+        periodLabel={range}
+      />
 
       {/* Cadencia mensual + Tags & Recientes */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
